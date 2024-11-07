@@ -1,8 +1,10 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next.js GitHub Authentication Example
+
+This project demonstrates how to implement GitHub authentication in a Next.js application using NextAuth.js.
 
 ## Getting Started
 
-First, run the development server:
+First, set up your development environment:
 
 ```bash
 npm run dev
@@ -14,23 +16,117 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Implementation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Install Dependencies
+   Install NextAuth.js and its dependencies:
 
-## Learn More
+```bash
+npm install next-auth
+# or
+yarn add next-auth
+```
 
-To learn more about Next.js, take a look at the following resources:
+2. Configure NextAuth.js
+   Create a file pages/api/auth/[...nextauth].js with the following content:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```javascript
+import NextAuth from "next-auth";
+import GithubProvider from "next-auth/providers/github";
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+export default NextAuth({
+  providers: [
+    GithubProvider({
+      clientId: process.env.GITHUB_ID,
+      clientSecret: process.env.GITHUB_SECRET,
+    }),
+  ],
+});
+```
 
-## Deploy on Vercel
+3. Set Up Environment Variables
+   Create a .env.local file in the root of your project:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```env
+GITHUB_ID=your_github_client_id
+GITHUB_SECRET=your_github_client_secret
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_nextauth_secret
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Replace your_github_client_id and your_github_client_secret with your actual GitHub OAuth credentials.
+
+4. Implement Authentication in Your App
+   Update your pages/\_app.js file:
+
+```javascript
+import { SessionProvider } from "next-auth/react";
+
+function MyApp({ Component, pageProps: { session, ...pageProps } }) {
+  return (
+    <SessionProvider session={session}>
+      <Component {...pageProps} />
+    </SessionProvider>
+  );
+}
+
+export default MyApp;
+```
+
+5. Create Login and Logout Buttons
+   In your desired component
+   javascript
+   Insert Code
+   Edit
+   Copy code
+
+```javascript
+import { signIn, signOut, useSession } from "next-auth/react";
+
+export default function AuthButtons() {
+  const { data: session } = useSession();
+
+  if (session) {
+    return (
+      <>
+        Signed in as {session.user.email} <br />
+        <button onClick={() => signOut()}>Sign out</button>
+      </>
+    );
+  }
+  return (
+    <>
+      Not signed in <br />
+      <button onClick={() => signIn("github")}>Sign in with GitHub</button>
+    </>
+  );
+}
+```
+
+6. Use the Authentication Component
+   In your pages/index.js or any other page:
+
+```javascript
+import AuthButtons from "../components/AuthButtons";
+
+export default function Home() {
+  return (
+    <div>
+      <h1>Next.js GitHub Authentication Example</h1>
+      <AuthButtons />
+    </div>
+  );
+}
+```
+
+Learn More
+To learn more about Next.js and NextAuth.js, check out the following resources:
+Next.js Documentation
+NextAuth.js Documentation
+GitHub OAuth Documentation
+Deploy on Vercel
+The easiest way to deploy your Next.js app is to use the Vercel Platform from the creators of Next.js.
+
+Check out the Next.js deployment documentation for more details.
